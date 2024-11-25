@@ -5,7 +5,7 @@ import numpy as np
 import os 
 import wrf_module as wrf
 import conf   #Load the default configuration
-from multiprocessing import Pool
+#from multiprocessing import Pool
 
 def run_wrf(args,conf=conf):
     #############################################################################################
@@ -16,8 +16,8 @@ def run_wrf(args,conf=conf):
     conf = conf.conf
     conf['expname']   = 'TEST_Multi_4_vars'
     conf['run_num']   = i
-    conf['modelpath'] = '/home/jorge.gacitua/datosmunin2/EXPERIMENTS_UNWEATHER/comp_model/em_quarter_ss'
-    conf['datapath']  = '/home/jorge.gacitua/datosmunin2/EXPERIMENTS_UNWEATHER/DATA'
+    conf['modelpath'] = '/vol0003/hp150019/data/jgacitua/Sensitivity_Experiments/em_quarter_ss'
+    conf['datapath']  = '/vol0003/hp150019/data/jgacitua/Sensitivity_Experiments'
 
     #Parameters controling the shape of the wind profile.
     conf['modify_wind_profile'] = True  #Are we going to modify the original wind profile?
@@ -57,8 +57,8 @@ def run_wrf(args,conf=conf):
     conf['sf_type'] = 'mean_precipitation' 
     conf['sf_percentile'] = 99.0 
 
-    conf['run_model'] = False  #Are we going to run the model?
-    conf['plot_exp']  = True  #Are we going to do detailed plots of the model solution?
+    conf['run_model'] = True#Are we going to run the model?
+    conf['plot_exp']  = False  #Are we going to do detailed plots of the model solution?
 
     #Parameters controling the model parameters (parameters controlling the model integration)
     conf['model_xdomain'] = 2000.0 * 42  #Do not change (total extension of the domain in the x direction, meters)
@@ -72,19 +72,24 @@ def run_wrf(args,conf=conf):
     #############################################################################################
     #  CALL WRF MODEL
     #############################################################################################
+    print('start running wrf')
     wrf.run_wrf( conf )
 
 
-csv_file_path = 'sampling_batch_96.csv'
+csv_file_path = 'sampling_batch_test.csv'
+i=1
 with open(csv_file_path, newline='') as csvfile:
+    print(f'reading file {i}')
     csv_reader = csv.reader(csvfile)
     next(csv_reader)  # Skip the header row if it exists
+    for row_number,row in enumerate(csv_reader):
+        run_wrf([row,row_number])
 
-
-    pool = Pool(processes=10)
+    #pool = Pool(processes=10)
     #pool.map(run_wrf, csv_reader)
-    pool.map(run_wrf, [(row, row_number) for row_number, row in enumerate(csv_reader)])
-    pool.close()
-    pool.join()
+    #pool.map(run_wrf, [(row, row_number) for row_number, row in enumerate(csv_reader)])
+    #pool.close()
+    #pool.join()
 
+    i+=1
 

@@ -1454,7 +1454,7 @@ def run_wrf(conf):
     #############################################################################################
     # PREPARATORY STEPS
     #############################################################################################
-
+    print('start wrf nunning from wrf module')
     # Create output directory
     expoutpath = conf['datapath'] + '/' + conf['expname'] + '/' + '{:03d}'.format( conf['run_num'] )
     os.makedirs(expoutpath, exist_ok=True)
@@ -1514,17 +1514,17 @@ def run_wrf(conf):
         # integration, wrf.exe integrates the Navier-Stokes equation from the initial conditions
         # and for the period of the simulation).
         print('Running ideal.exe')
-        os.system('./ideal.exe > out_ideal.log')
+        #os.system('./ideal.exe > out_ideal.log')
         print('Running wrf.exe')
-        os.system('export OMP_NUM_THREADS=' + str(conf['nthreads']) + ';./wrf.exe > out_wrf.log')
+        #os.system('export OMP_NUM_THREADS=' + str(conf['nthreads']) + ';./wrf.exe > out_wrf.log')
         # Move the output (netcdf file containing 4D arrays representing spatio-temporal variation
         # of different physical variables such as temperatur, pressure, wind components, clouds)
-        os.system('mv ./wrfout_d01_0001-01-01_00:00:00 ' + outdatafile)
+        #os.system('mv ./wrfout_d01_0001-01-01_00:00:00 ' + outdatafile)
 
     #############################################################################################
     # STEP 4 - OBTAIN SIMULATION METRICS
     #############################################################################################
-
+    '''
     if conf['run_model'] :
 
         sensitivity_score = sensitivity_function_single_file(outdatafile, sf_type=conf['sf_type'],
@@ -1533,7 +1533,7 @@ def run_wrf(conf):
                                                              , initime=conf['sf_initime'], endtime=conf['sf_endtime'])
 
         print('The sensitivity score is : ', sensitivity_score)
-
+    '''
     #############################################################################################
     # STEP 5 (OPTIONAL) - PLOT THE OUTPUT
     #############################################################################################
