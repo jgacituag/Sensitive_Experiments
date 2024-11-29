@@ -7,7 +7,7 @@ import wrf_module as wrf
 import conf   #Load the default configuration
 #from multiprocessing import Pool
 
-def run_wrf(args,conf=conf):
+def run_wrf(args):
     #############################################################################################
     # CONFIGURATION PARAMETERS (in a future version this can be an input to a function)
     #############################################################################################
@@ -18,6 +18,7 @@ def run_wrf(args,conf=conf):
     conf['run_num']   = i
     conf['modelpath'] = '/vol0003/hp150019/data/jgacitua/Sensitivity_Experiments/em_quarter_ss'
     conf['datapath']  = '/vol0003/hp150019/data/jgacitua/Sensitivity_Experiments'
+    conf['nthreads']  = 3 #Number of threads that will be used for running WRF    
 
     #Parameters controling the shape of the wind profile.
     conf['modify_wind_profile'] = True  #Are we going to modify the original wind profile?
@@ -34,7 +35,10 @@ def run_wrf(args,conf=conf):
     conf['shear_strength_u'] = 5.0e-3   #Shear in m/s^2 (for the u component)
     conf['shear_depth_v']    = 8000.0   #Heigth of no shear (for the v component)
     conf['shear_strehgth_v'] = 0.0      #Maximum V-wind in m/s (for the v component a sine type shear is assumed)
-
+    conf['shear_freq_v']     = 0.5*np.pi    #This controls the wind gire, 0.5pi means quarter circle pi means half a circle, 2pi means full circle)
+    conf['shear_amp_v']      = 0.0      #Maximum V-wind in m/s (for the v component a sine type shear is assumed)
+    conf['surf_u'] = 0.0   #u-wind component at the surface (only meaningul is some type of surface drag is active)
+    conf['surf_v'] = 0.0   #v-wind component at the surface (only meaningul is some type of surface drag is active)
     conf['llj_amp']         = 0.0      #Low level jet local maximum (for the u component)
     conf['llj_h']           = 1500.0   #Low level jet heigth (for the u component)
     conf['llj_width']       = 500.0    #Low level jet width  (for the u component)
@@ -44,6 +48,13 @@ def run_wrf(args,conf=conf):
     conf['modify_stability'] = True          #Are we going to modify the original stability?
     conf['stability_factor'] = -1.5+(param4*(1.5--1.5))          #Factor controling the stability change (tipical range [-1.5 , 1.5] )
     conf['stability_factor_height'] = 5000 #2500+(param4*(10000-2500)) #Height of maximum warming / cooling. (tipical range [2500 , 10000 ] )
+
+    #Parameters controling the shape of the potential temperature profile.
+    conf['modify_theta_profile'] = False  #Are we going to modify the original temperature?
+    conf['surf_theta']           = 288.0 #Potential temperature at the lowest model level.
+    #Temperature profile will be computed as costant d(theta)/dz in user defined layers.
+    conf['theta_layer_limits']  = np.array([0.0,3000.0,15000.0])  #Layer limits.
+    conf['dthetadz_layer']      = np.array([4.0,4.0,4.0])/1000.0 #dthetadz corresponding to each layer.
 
     #Parameters controling the shape of the moisture profile.
     conf['modify_moisture_profile'] = False       #Are we going to modify the original moisture profile?
@@ -68,6 +79,8 @@ def run_wrf(args,conf=conf):
     conf['model_nz'] = 41                #Number of vertical levels (integer)
     conf['model_dy'] = conf['model_dx']  #Model resolution in the y-direction (for the moment we kept this equal to the resolution in the x-direction). 
     conf['model_ny'] = conf['model_nx']  #Number of grid points in the y direction (for the moment we keep this constant). 
+    conf['model_dt_fract_num'] = 0       #Numerator for fractional time step (from 1 to 10)
+    conf['model_dt_fract_den'] = 1       #Denominator for fractional time step (for the moment we kept this equal to 10)
 
     #############################################################################################
     #  CALL WRF MODEL
